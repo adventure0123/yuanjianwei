@@ -90,7 +90,7 @@
 <meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/05/25/docker/index.html">
 <meta property="og:site_name" content="Adventure's Blog">
 <meta property="og:description" content="本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。">
-<meta property="og:updated_time" content="2016-05-25T16:26:37.000Z">
+<meta property="og:updated_time" content="2016-05-25T16:30:13.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="docker">
 <meta name="twitter:description" content="本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。">
@@ -281,7 +281,8 @@
       
 
       
-        <h4 id="本文通过构建一个完整的基于nginx-nodejs-redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。"><a href="#本文通过构建一个完整的基于nginx-nodejs-redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。" class="headerlink" title="本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。"></a>本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。<a id="more"></a></h4><h3 id="一：docker简介"><a href="#一：docker简介" class="headerlink" title="一：docker简介"></a>一：docker简介</h3><p>　　docker是一种能把应用和依赖打包到虚拟的容器中，并运行在任何Linux服务器上的工具。docker采用沙盒机制，保证所有的应用保持隔离。当应用被打包成docker image后，部署和运行变的极其的方便，这有助于应用的灵活性和便携性。docker主要可以分为container，image，docker hub等三部分。container是用户应用和服务真正运行的场所，可以简单的理解为一个个集装箱，用户的应用和服务就运行在container上，image是docker镜像，docker hub类似于github，github维护的是用户的代码，docker hub维护的是用户的镜像。用户可以把自己的image打包上传到docker hub,也可以在docker hub上下载其他用户或者官方的镜像。下面我们将会介绍基于docker搭建一个web服务。在本例子中我们将会实现一个统计页面访问次数并存入redis数据库的简单应用。该应用采用redis作为数据库，nodejs作为后台，nginx进行负载均衡。整个架构如下图所示：</p>
+        <p>本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。<a id="more"></a></p>
+<h3 id="一：docker简介"><a href="#一：docker简介" class="headerlink" title="一：docker简介"></a>一：docker简介</h3><p>　　docker是一种能把应用和依赖打包到虚拟的容器中，并运行在任何Linux服务器上的工具。docker采用沙盒机制，保证所有的应用保持隔离。当应用被打包成docker image后，部署和运行变的极其的方便，这有助于应用的灵活性和便携性。docker主要可以分为container，image，docker hub等三部分。container是用户应用和服务真正运行的场所，可以简单的理解为一个个集装箱，用户的应用和服务就运行在container上，image是docker镜像，docker hub类似于github，github维护的是用户的代码，docker hub维护的是用户的镜像。用户可以把自己的image打包上传到docker hub,也可以在docker hub上下载其他用户或者官方的镜像。下面我们将会介绍基于docker搭建一个web服务。在本例子中我们将会实现一个统计页面访问次数并存入redis数据库的简单应用。该应用采用redis作为数据库，nodejs作为后台，nginx进行负载均衡。整个架构如下图所示：</p>
 <h3 id="二：docker安装"><a href="#二：docker安装" class="headerlink" title="二：docker安装"></a>二：docker安装</h3><p>　　下面我们将会以64位的Ubuntu 14.04为例子介绍docker的安装过程。</p>
 <ul>
 <li><p>a:升级你的包管理器</p>
@@ -538,7 +539,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#本文通过构建一个完整的基于nginx-nodejs-redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。"><span class="nav-number">1.</span> <span class="nav-text">本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一：docker简介"><span class="nav-number"></span> <span class="nav-text">一：docker简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二：docker安装"><span class="nav-number"></span> <span class="nav-text">二：docker安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三：redis容器"><span class="nav-number"></span> <span class="nav-text">三：redis容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四：nodejs容器"><span class="nav-number"></span> <span class="nav-text">四：nodejs容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五：nginx容器"><span class="nav-number"></span> <span class="nav-text">五：nginx容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#六-docker常用命令"><span class="nav-number"></span> <span class="nav-text">六: docker常用命令</span></a></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一：docker简介"><span class="nav-number">1.</span> <span class="nav-text">一：docker简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二：docker安装"><span class="nav-number">2.</span> <span class="nav-text">二：docker安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三：redis容器"><span class="nav-number">3.</span> <span class="nav-text">三：redis容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四：nodejs容器"><span class="nav-number">4.</span> <span class="nav-text">四：nodejs容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五：nginx容器"><span class="nav-number">5.</span> <span class="nav-text">五：nginx容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#六-docker常用命令"><span class="nav-number">6.</span> <span class="nav-text">六: docker常用命令</span></a></li></ol></div>
             
           </div>
         </section>
