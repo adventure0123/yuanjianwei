@@ -3,17 +3,18 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Hexo
+title: Adventure's Blog
 subtitle:
-description:
-author: John Doe
-language:
+description: looking forword to life's next adventure
+author: adventure
+language: zh-Hans
 timezone:
+avatar: /uploads/photo.jpeg
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://yoursite.com
-root: /
+url: http://adventure0123.github.io/yuanjianwei
+root: /yuanjianwei/
 permalink: :year/:month/:day/:title/
 permalink_defaults:
 
@@ -63,9 +64,10 @@ pagination_dir: page
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: landscape
+theme: next
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
-  type:
+  type: git
+  repo: git@github.com:adventure0123/yuanjianwei.git
