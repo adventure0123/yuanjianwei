@@ -70,5 +70,5 @@ theme: next
 ## Docs: https://hexo.io/docs/deployment.html
 deploy:
   type: git
-  repo: git@github.com:adventure0123/yuanjianwei.git
+  repo: https://github.com/adventure0123/yuanjianwei.git
   branch: gh-pages
