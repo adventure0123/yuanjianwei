@@ -71,3 +71,4 @@ theme: next
 deploy:
   type: git
   repo: git@github.com:adventure0123/yuanjianwei.git
+  branch: gh-pages
