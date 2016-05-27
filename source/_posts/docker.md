@@ -7,8 +7,9 @@ tags: docker
 本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。<!--more-->
 ### 一：docker简介 
 　　docker是一种能把应用和依赖打包到虚拟的容器中，并运行在任何Linux服务器上的工具。docker采用沙盒机制，保证所有的应用保持隔离。当应用被打包成docker image后，部署和运行变的极其的方便，这有助于应用的灵活性和便携性。docker主要可以分为container，image，docker hub等三部分。container是用户应用和服务真正运行的场所，可以简单的理解为一个个集装箱，用户的应用和服务就运行在container上，image是docker镜像，docker hub类似于github，github维护的是用户的代码，docker hub维护的是用户的镜像。用户可以把自己的image打包上传到docker hub,也可以在docker hub上下载其他用户或者官方的镜像。下面我们将会介绍基于docker搭建一个web服务。在本例子中我们将会实现一个统计页面访问次数并存入redis数据库的简单应用。该应用采用redis作为数据库，nodejs作为后台，nginx进行负载均衡。整个架构如下图所示：
-        ![docker](../../../../img/docker.png)
-
+<center>
+![docker](../../../../img/docker.png)
+</center>
 
 ### 二：docker安装
 
