@@ -1,5 +1,5 @@
 ---
-title: redis
+title: redis cluster
 date: 2016-06-02 22:00:56
 tags: [redis,sentinel,twenproxy,haproxy]
 ---
