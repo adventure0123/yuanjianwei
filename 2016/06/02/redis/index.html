@@ -1,0 +1,620 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis,sentinel,twenproxy,haproxy," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本文主要介绍高可用性redis集群的配置。">
+<meta name="keywords" content="redis,sentinel,twenproxy,haproxy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis cluster">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/06/02/redis/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="本文主要介绍高可用性redis集群的配置。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/redis-group.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/redis-slave.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/sdown.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/reboot.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/failover.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/t-get.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/r-get.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/t-set.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/r-set.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/haproxy.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/haproxy-bad.png">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis cluster">
+<meta name="twitter:description" content="本文主要介绍高可用性redis集群的配置。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/redis-group.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> redis cluster | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                redis cluster
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-02T22:00:56+08:00" content="2016-06-02">
+              2016-06-02
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要介绍高可用性redis集群的配置。<a id="more"></a>为了提高网站的响应速度，现在基本都把常用的数据放在redis缓存中，redis作为一个缓存数据库已经在各大公司得到了广泛的应用。首先内存的资源是有限制的，随着需要缓存的内容越来越多，redis需要满足scale out横向扩展，这就需要多台主机协调提供服务，即分布式多个redis实例协同运行。其次，redis本身只支持单线程，一般只能使用10-20G的内存，这对于现在动辄都是200G内存的服务器来说造成很大的资源浪费，因此我们需要对数据分片，存储在多个redis实例中。最后redis作为内存数据库，宕机容易造成数据的丢失，因此我们需要配置多个主从来保证redis服务的高可用性。本文介绍的高可用性redis集群架构如下：<br><img src="../../../../img/redis-group.png" alt="docker"><br>首先使用redis自带的sentinel对redis实例设置多个主从，然后在用开源的twenproxy对多个主从redis实例进行分片，最后使用haproxy对twenproxy进行负载均衡。</p>
+<h4 id="一：sentinel配置"><a href="#一：sentinel配置" class="headerlink" title="一：sentinel配置"></a>一：sentinel配置</h4><p>redis-sentinel是redis官方推荐的高可用性解决方案，sentinel将会不时的监控redis是否按照预期良好的运行。当master宕机时，sentinel将会自动切换，将salve升级成master，从而保证redis的可用性。<br>首先我们配置两个redis实例，一个作为master，一个作为slave，master运行在端口6379，slave运行在6380端口。slaver配置如下：</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">slaveof <span class="number">127.0</span>.<span class="number">0.1</span> <span class="number">6379</span></div><div class="line">port <span class="number">6380</span></div></pre></td></tr></table></figure>
+<p>启动master和slave如下图所示：<br><img src="../../../../img/redis-slave.png" alt="docker"></p>
+<p>redis自动同步数据，默认情况下slave为只读。对sentinel的设置如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">sentinel monitor mymaster 127.0.0.1 6379 1</div><div class="line">sentinel down-after-milliseconds mymaster 1000</div><div class="line">sentinel failover-timeout mymaster 2000</div><div class="line">sentinel config-epoch mymaster 1</div></pre></td></tr></table></figure>
+<p>第一行配置说明sentinel去监视一个名为mymaster的主服务器，这个服务器的地址为127.0.0.1端口号为6379,而将这个主服务器判断为失效至少需要1个sentinel同意.（只要同意的sentinel数量不达标，自动故障迁移就不会执行。同时还要注意，无论你设置要多少个sentinel同意判断一个服务器失效，一个 sentinel都需要获得系统中多数（majority)sentinel的支持， 才能发起一次自动故障迁移，换句话说，在只有少数（minority） sentinel进程正常运作的情况下,sentinel是不能执行自动故障迁移的。其他选项的基本格式如下：down-after-milliseconds 选项指定了 sentinel认为服务器已经断线所需的毫秒数.如果服务器在给定的毫秒数之内,没有返回sentinel发送的PING命令的回复,或者返回一个错误,那么 sentinel将这个服务器标记为主观下线（subjectively down，简称 SDOWN ）。sentinel failover-timeout mymaster表示设置failover的超时时间是多少毫秒。sentinel config-epoch mymaster表示允许一次性有几台slave连接新的master（建议一个）。<br>启动sentinel：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-sentinel sentinel.conf</div></pre></td></tr></table></figure>
+<p>关闭slave显示+sdown，重启slave，显示+reboot，-sdown。如下图：<br><img src="../../../../img/sdown.png" alt="docker"><br><img src="../../../../img/reboot.png" alt="docker"><br>关闭master，sentinel自动切换，将slave升级成master。如下图：<br><img src="../../../../img/failover.png" alt="docker"></p>
+<h4 id="二：twenproxy配置"><a href="#二：twenproxy配置" class="headerlink" title="二：twenproxy配置"></a>二：twenproxy配置</h4><p>twenproxy，也叫nutcraker，是Twitter开源的一个redis和memcache代理服务器。通过twenproxy可以使用多台服务器来水平扩展redis服务，可以有效的比喵redis单点故障。虽然使用twenproxy会带来一定的性能损失（Twitter测试大概在百分之20），但是能够提高整个系统的稳定性和可用性，twenproxy可以把数据sharding到多台服务器上。</p>
+<ul>
+<li>1 安装<br>tenproxy的安装非常简单。先下载nutcracker-0.3.0.tar.gz，然后解压编译安装。</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">tar zxvf nutcracker-0.3.0.tar</div><div class="line"><span class="built_in">cd</span> nutcracker-0.3.0</div><div class="line">./configure</div><div class="line">make</div><div class="line">make install</div></pre></td></tr></table></figure>
+<ul>
+<li>2 配置文件<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">alph<span class="variable">a:</span></div><div class="line">    listen: <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">22222</span></div><div class="line">    hash: fnv1a_64</div><div class="line">    distribution: ketama </div><div class="line">    auto_eject_host<span class="variable">s:</span> true</div><div class="line">    <span class="keyword">redi</span><span class="variable">s:</span> true</div><div class="line">    server_retry_timeou<span class="variable">t:</span> <span class="number">30000</span></div><div class="line">    server_failure_limi<span class="variable">t:</span> <span class="number">1</span></div><div class="line">    server<span class="variable">s:</span></div><div class="line">      - <span class="number">192.168</span>.<span class="number">1.10</span>:<span class="number">6379</span>:<span class="number">1</span> master0</div><div class="line">      - <span class="number">192.168</span>.<span class="number">1.7</span>:<span class="number">6379</span>:<span class="number">1</span>  master1</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>listen表示服务的地址和端口，hash表示具体使用的hash函数，distribution表示使用的分发模式（可用模式ketama，modula，random），auto_eject_hosts表示是否在节点无法响应的时候临时摘除节点，redis，表示是否是redis的proxy，server_retry_timeout表示重试的时间，单位为毫秒，server_failure_limit表示节点故障多少次就摘除掉。</p>
+<ul>
+<li><p>3 启动服务</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">nutcracker -t 测试配置文件</div><div class="line">nutcracker <span class="_">-d</span> -c /usr/<span class="built_in">local</span>/twemproxy/conf/nutcracker.yml</div></pre></td></tr></table></figure>
+</li>
+<li><p>4 性能测试<br>分别对twenproxy和redis进行set和get测试，测试结果下图所示，结果显示twenproxy有部分性能损失。<br><img src="../../../../img/t-get.png" alt="docker"><br><img src="../../../../img/r-get.png" alt="docker"><br><img src="../../../../img/t-set.png" alt="docker"><br><img src="../../../../img/r-set.png" alt="docker"></p>
+</li>
+</ul>
+<h4 id="三：haproxy配置"><a href="#三：haproxy配置" class="headerlink" title="三：haproxy配置"></a>三：haproxy配置</h4><p>haproxy是一款功能强大，使用灵活的反向代理软件，其提供了高可用性，负载均衡，后端服务器代理等功能。和nginx相比，haproxy支持虚拟主机，并可以工作在4层（tcp层）和7层（http层）。能够补充nginx的一些缺点，比如session的保持，cookie的引导等工作，单纯从负载均衡上衡量haproxy的效率高于nginx,并且提供多种负载均衡算法。</p>
+<ul>
+<li>1 安装</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">wget http://haproxy.1wt.eu/download/1.3/src/haproxy-1.3.20.tar.gz</div><div class="line">tar zcvf haproxy-1.3.20.tar.gz</div><div class="line"><span class="built_in">cd</span> haproxy-1.3.20</div><div class="line">make TARGET=linux26 PREFIX=/usr/<span class="built_in">local</span>/haproxy                                <span class="comment">#将haproxy安装到/usr/local/haproxy</span></div><div class="line"><span class="comment"># make install PREFIX=/usr/local/haproxy</span></div></pre></td></tr></table></figure>
+<ul>
+<li>2 配置</li>
+</ul>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">global</span>  </div><div class="line">    maxconn <span class="number">51200</span>  </div><div class="line">    chroot /usr/local/haproxy  </div><div class="line">    uid <span class="number">99</span>  </div><div class="line">    gid <span class="number">99</span>  </div><div class="line">    daemon  </div><div class="line">    #quiet  </div><div class="line">    nbproc <span class="number">1</span> #进程数  </div><div class="line">    pidfile /usr/local/haproxy/logs/haproxy.pid  </div><div class="line">  </div><div class="line">defaults  </div><div class="line">        <span class="keyword">mode</span> http #默认的模式<span class="keyword">mode</span> &#123; tcp|http|health &#125;，tcp是<span class="number">4</span>层，http是<span class="number">7</span>层，health只会返回OK  </div><div class="line">        #retries <span class="number">2</span> #两次连接失败就认为是服务器不可用，也可以通过后面设置  </div><div class="line">        option redispatch #当serverId对应的服务器挂掉后，强制定向到其他健康的服务器  </div><div class="line">        option abortonclose #当服务器负载很高的时候，自动结束掉当前队列处理比较久的链接  </div><div class="line">        timeout connect <span class="number">5000</span>ms #连接超时  </div><div class="line">        timeout client <span class="number">30000</span>ms #客户端超时  </div><div class="line">        timeout server <span class="number">30000</span>ms #服务器超时  </div><div class="line">        #timeout check <span class="number">2000</span> #=心跳检测超时  </div><div class="line">        <span class="built_in">log</span> <span class="number">127.0</span>.<span class="number">0.1</span> local0 err #[err warning info <span class="keyword">debug</span>]  </div><div class="line">        balance roundrobin                     #负载均衡算法  </div><div class="line">        option  httplog                        #日志类别,采用httplog  </div><div class="line">        option  httpclose   #每次请求完毕后主动关闭http通道,<span class="keyword">ha</span>-proxy不支持keep-alive,只能模拟这种模式的实现  </div><div class="line">        option  dontlognull  </div><div class="line">        option  forwardfor  #如果后端服务器需要获得客户端真实ip需要配置的参数，可以从Http Header中获得客户端ip</div><div class="line">listen admin_stats</div><div class="line">        bind <span class="number">0.0</span>.<span class="number">0.0</span>:<span class="number">8888</span></div><div class="line">        option httplog</div><div class="line">        stats refresh <span class="number">30</span>s</div><div class="line">        stats uri /stats</div><div class="line">        stats realm Haproxy Manager</div><div class="line">        stats auth admin:admin</div><div class="line">        #stats <span class="keyword">hide</span>-<span class="keyword">version</span></div><div class="line"></div><div class="line">listen web_proxy <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">3000</span></div><div class="line">        #option httpchk HEAD /<span class="built_in">index</span>.php  HTTP/<span class="number">1.0</span></div><div class="line">        server web1 localhos<span class="variable">t:8080</span> cookie app1inst1 check inter <span class="number">2000</span> rise <span class="number">2</span> fall <span class="number">5</span></div><div class="line">        server web2 localhos<span class="variable">t:8081</span> cookie app1inst2 check inter <span class="number">2000</span> rise <span class="number">2</span> fall <span class="number">5</span></div></pre></td></tr></table></figure>
+<ul>
+<li>3 启动</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">/usr/<span class="built_in">local</span>/haproxy/sbin/haproxy <span class="_">-f</span> /usr/<span class="built_in">local</span>/haproxy/haproxy.cfg</div></pre></td></tr></table></figure>
+<p><img src="../../../../img/haproxy.png" alt="docker"><br>关闭其中一个后台服务。<br><img src="../../../../img/haproxy-bad.png" alt="docker"></p>
+<p>四：keepalived<br>keepalived是集群管理中保证集群高可用的一个服务软件，用来防止单点故障。keepalived是以VRRP协议为基础实现，即将N台提供相同功能的服务器组成一个服务组，这个组里有一个master和多个backup，master上面有一个对外提供服务的VIP，master会发送组播，当backup收不到vrrp就认为master已经宕机了，这时根据vrrp的优先级来选举一个backup当master，这样就保证了服务的高可用性。具体的配置将会在未来更新。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/redis/" rel="tag">#redis</a>
+          
+            <a href="/yuanjianwei/tags/sentinel/" rel="tag">#sentinel</a>
+          
+            <a href="/yuanjianwei/tags/twenproxy/" rel="tag">#twenproxy</a>
+          
+            <a href="/yuanjianwei/tags/haproxy/" rel="tag">#haproxy</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/06/09/hadoop/" rel="next" title="hadoop">
+                <i class="fa fa-chevron-left"></i> hadoop
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/05/29/webbench/" rel="prev" title="webbench">
+                webbench <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一：sentinel配置"><span class="nav-number">1.</span> <span class="nav-text">一：sentinel配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二：twenproxy配置"><span class="nav-number">2.</span> <span class="nav-text">二：twenproxy配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三：haproxy配置"><span class="nav-number">3.</span> <span class="nav-text">三：haproxy配置</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

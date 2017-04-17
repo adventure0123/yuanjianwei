@@ -1,0 +1,678 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="docker," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。">
+<meta name="keywords" content="docker">
+<meta property="og:type" content="article">
+<meta property="og:title" content="docker">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/05/25/docker/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/docker.png">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="docker">
+<meta name="twitter:description" content="本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/docker.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> docker | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                docker
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-25T20:23:11+08:00" content="2016-05-25">
+              2016-05-25
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文通过构建一个完整的基于nginx,nodejs,redis的web项目来介绍docker的开发和部署流程，希望对后来的人有帮助。<a id="more"></a></p>
+<h3 id="一：docker简介"><a href="#一：docker简介" class="headerlink" title="一：docker简介"></a>一：docker简介</h3><p>　　docker是一种能把应用和依赖打包到虚拟的容器中，并运行在任何Linux服务器上的工具。docker采用沙盒机制，保证所有的应用保持隔离。当应用被打包成docker image后，部署和运行变的极其的方便，这有助于应用的灵活性和便携性。docker主要可以分为container，image，docker hub等三部分。container是用户应用和服务真正运行的场所，可以简单的理解为一个个集装箱，用户的应用和服务就运行在container上，image是docker镜像，docker hub类似于github，github维护的是用户的代码，docker hub维护的是用户的镜像。用户可以把自己的image打包上传到docker hub,也可以在docker hub上下载其他用户或者官方的镜像。下面我们将会介绍基于docker搭建一个web服务。在本例子中我们将会实现一个统计页面访问次数并存入redis数据库的简单应用。该应用采用redis作为数据库，nodejs作为后台，nginx进行负载均衡。整个架构如下图所示：</p>
+<center><br><img src="../../../../img/docker.png" alt="docker"><br></center>
+
+<h3 id="二：docker安装"><a href="#二：docker安装" class="headerlink" title="二：docker安装"></a>二：docker安装</h3><p>　　下面我们将会以64位的Ubuntu 14.04为例子介绍docker的安装过程。</p>
+<ul>
+<li><p>a:升级你的包管理器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get update</div></pre></td></tr></table></figure>
+</li>
+<li><p>b:安装所有必须和可选的包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo apt-get install linux-image-generic-lts-trusty</div></pre></td></tr></table></figure>
+</li>
+<li><p>c:重启电脑</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo reboot</div></pre></td></tr></table></figure>
+</li>
+<li><p>d:获取最新的docker安装包</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ curl <span class="_">-s</span>SL http s: // get .docker. com / | sh</div></pre></td></tr></table></figure>
+</li>
+<li><p>e:运行docker守护进程</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo docker <span class="_">-d</span> &amp;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>　　Note:发现运行过程中出现报错：“ubuntu 14.04 docker your kernel does not support cgroup memory limit: mountpoint for memory not found”。为了解决这个错误，首先打开grub文件，<code>sudo vi /etc/default/grub</code>，然后修改，<code>Modify: GRUB_CMDLINE_LINUX=&quot;cgroup_enable=memory swapaccount=1”</code>，保存并推出，更新grub文件,<code>sudo update-grub</code>;最后重启电脑，<code>sudo reboot</code>。</p>
+<ul>
+<li><p>f:确认docker是否成功安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo docker run hello-world</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>如果正确安装，将会会提示“Hello from Docker.This message shows that your installation appears to be working correctly.”</p>
+<ul>
+<li>g：如果你不想每次运行docker使用root权限，可以进行一下操作</li>
+</ul>
+<p>首先创建docker用户组并添加用户，<code>$ sudo usermod -aG docker ubuntu</code>；注销登录并重新登录；最后验证docker用户不再需要sudo命令执行docker：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run hello-world</div></pre></td></tr></table></figure>
+<h3 id="三：redis容器"><a href="#三：redis容器" class="headerlink" title="三：redis容器"></a>三：redis容器</h3><p>  本小结将会介绍redis的安装和使用。</p>
+<ul>
+<li><p>a:下载最新的redis镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo docker pull redis:latest</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>我们直接从docker hub上下载最新的官方redis镜像。它预打包了redis的安装，默认端口是6379，你可以不用修改任何参数直接运行。</p>
+<ul>
+<li><p>b:启动redis容器，并将端口映射到默认的6379</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ sudo docker run -it —-name reids -p 6379:6379 redis</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>—-name参数可以指定容器的名字，-it表示容器以交互的形式运行，当然也可以使用-d让容器在后台运行，-p可以指定容器的映射端口，docker会将容器内部端口映射到本地host，如果采用-P，容器将会随机从49153 和65535之间查找一个未被占用的端口绑定到container。默认情况下，容器退出之后，容器将会保存下来，如果加上—rm参数，则docker会在container结束之后自动清理其产生的数据。</p>
+<ul>
+<li>c:数据的持久化</li>
+</ul>
+<p>默认情况下容器运行期间产生的数据是不会写入镜像中，重新运行容器将会初始化数据。如果想要数据持久化可以使用数据卷挂载实现持久化。数据卷可以被不同的容器共享，容器可以直接对数据卷里面的内容进行修改，数据卷的变化不会影响容器的更新，即使容器被删除，数据卷也会一直存在。首先我们打开本地的redis.conf修改rdb文件的路径为：<code>dir ./</code>。然后将本地的rdb和config文件挂载到容器中的data目录下,本例子中rdb和config文件都在redis目录下：<code>-v /home/adventure/redis:/data</code>，最后启动:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ redis:docker run —name redis <span class="_">-d</span>  -p 6379:6379 -v /home/adventure/redis:/data redis /data/redis.conf</div></pre></td></tr></table></figure>
+<h3 id="四：nodejs容器"><a href="#四：nodejs容器" class="headerlink" title="四：nodejs容器"></a>四：nodejs容器</h3><p>   本小结介绍nodejs容器的安装。</p>
+<ul>
+<li><p>a:下载nodejs镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker pull readytalk/nodejs</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>我这里下的是readytalk的nodejs镜像，当然也可以下载其他的nodejs镜像</p>
+<ul>
+<li><p>b:新建本地的nodejs项目</p>
+<ol>
+<li><p>1：首先在本地linux中新建一个nodejs项目，1:<code>express -e myapp</code>;2:进入myapp目录安装项目依赖，<code>npm install</code>。</p>
+</li>
+<li><p>2：新建完nodejs项目之后，我们需要做一点小小的修改。进入routers目录下打开index.js,添加redis模块的依赖，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">var redis=require(&quot;redis&quot;);</div><div class="line">var client=redis.createClient(&apos;6379&apos;,&apos;redis&apos;);</div></pre></td></tr></table></figure>
+<p>这里要注意为了等会连接redis容器，创建redis client的时候’redis’不能写成“127.0.0.1”。</p>
+</li>
+<li><p>3：修改router中的回调函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">router.get(&apos;/&apos;, function(req, res, next) &#123;</div><div class="line">     client.incr(&apos;counter&apos;,function(err,counter)&#123;</div><div class="line">      if(err)&#123;</div><div class="line">          return next(err);</div><div class="line">      &#125;</div><div class="line">      res.render(&apos;index&apos;,&#123;title:&apos;viewed&apos;+counter+&apos;times&apos;&#125;);</div><div class="line">  &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</li>
+<li><p>4：保存推出，安装redis依赖模块，<code>npm install redis</code>。</p>
+</li>
+</ol>
+</li>
+<li><p>c:启动nodejs容器并和redis容器相连</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run <span class="_">-d</span> -p 3000:8080 --name myapp --link redis:redis -v  /home/adventure/myapp:/data -w /data readytalk/nodejs npm start</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>其中-w表示nodejs的工作目录，—-link参数用来将本容器和其他容器相连。第一个redis表示要连接的容器名称，必须要和创建client（<code>var client=redis.createClient(&#39;6379&#39;,&#39;redis&#39;);</code>）中的别名相同，第二个redis表示这个连接的别名。由于要做负载均衡，我这里创建2个nodejs容器，myapp和myapp1.</p>
+<h3 id="五：nginx容器"><a href="#五：nginx容器" class="headerlink" title="五：nginx容器"></a>五：nginx容器</h3><ul>
+<li><p>a：下载nginx镜像</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker pull nginx</div></pre></td></tr></table></figure>
+</li>
+<li><p>b：修改本地nginx配置文件<br> 打开nginx.cof,在http下，添加upstream节点</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">upstream node-app &#123;</div><div class="line">      server myapp:3000;</div><div class="line">      server myapp1:3001;</div><div class="line">&#125;，</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>然后将server节点下的location节点中的proxy_pass配置为：http:// + upstream名称，即“<a href="http://node-app”.保存并推出" target="_blank" rel="external">http://node-app”.保存并推出</a></p>
+<ul>
+<li><p>c:启动nginx</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ docker run --rm --name nginx -p 80:80 -v /etc/nginx/nginx.conf:/etc/nginx/nginx.conf --link myapp:myapp --link app1:app1 nginx</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>用本地的conf替换docker中的conf配置。</p>
+<h3 id="六-docker常用命令"><a href="#六-docker常用命令" class="headerlink" title="六: docker常用命令"></a>六: docker常用命令</h3><ul>
+<li><p>1：查看docker信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#查看docker版本</span></div><div class="line">$ docker version</div><div class="line"><span class="comment">#查看docker系统信息</span></div><div class="line">$ docker info</div></pre></td></tr></table></figure>
+</li>
+<li><p>2：对image操作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#下载image</span></div><div class="line">$ docker pull image_name</div><div class="line"> <span class="comment">#列出docker列表</span></div><div class="line">$ docker images</div></pre></td></tr></table></figure>
+</li>
+<li><p>3:启动容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#运行容器</span></div><div class="line">$ docker run image_name</div><div class="line"><span class="comment">#交互式进入容器中 </span></div><div class="line">$ docker run -i -t image_name /bin/bash</div></pre></td></tr></table></figure>
+</li>
+<li><p>4：查看容器</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#列出当前所有正在运行的container</span></div><div class="line">$ docker ps</div><div class="line"><span class="comment">#列出所有的container</span></div><div class="line">$ docker ps <span class="_">-a</span></div><div class="line"><span class="comment">#列出最近一次启动的container</span></div><div class="line">$ docker ps <span class="_">-l</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>5：保存对容器的修改</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># 保存对容器的修改; -a, --author="" Author; -m, --message="" Commit message</span></div><div class="line">$ docker commit ID new_image_name</div></pre></td></tr></table></figure>
+</li>
+<li><p>6：对容器的操作</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#删除所有的容器</span></div><div class="line">$ docker rm ‘docer ps <span class="_">-a</span> -q’</div><div class="line"><span class="comment">#删除单个容器</span></div><div class="line">$ docker rm container_name/container_ID</div><div class="line"><span class="comment">#连接另一个容器</span></div><div class="line">$ docker run  - - link container_name </div><div class="line"><span class="comment">#后台运行</span></div><div class="line">$ docker run <span class="_">-d</span></div><div class="line"><span class="comment">#每次运行完之后删除容器</span></div><div class="line">$ docker run - -rm</div><div class="line"><span class="comment">#重启启动停止启动杀死一个容器</span></div><div class="line">$ docker restart Name/ID</div><div class="line">$ docker stop Name/ID</div><div class="line">$ docker start Name/ID</div><div class="line">$ docker <span class="built_in">kill</span> Name/ID</div><div class="line"></div><div class="line"><span class="comment">#显示一个运行的容器里面的进程信息</span></div><div class="line">$ docker top Name/ID</div><div class="line"></div><div class="line"><span class="comment">#从一个容器中取日志</span></div><div class="line">$ docker logs Name/ID</div><div class="line"></div><div class="line"><span class="comment">#从容器里面拷贝文件/目录到本地路径</span></div><div class="line">$ docker cp Name:/container_path  local_path</div><div class="line">$ docker cp ID:/container_path local_path</div><div class="line"></div><div class="line"><span class="comment">#从本地拷贝到容器</span></div><div class="line">$ docker cp local_path Name:/container_path</div></pre></td></tr></table></figure>
+</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/docker/" rel="tag">#docker</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/05/29/webbench/" rel="next" title="webbench">
+                <i class="fa fa-chevron-left"></i> webbench
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/05/24/hello-world/" rel="prev" title="Hello World">
+                Hello World <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一：docker简介"><span class="nav-number">1.</span> <span class="nav-text">一：docker简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二：docker安装"><span class="nav-number">2.</span> <span class="nav-text">二：docker安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三：redis容器"><span class="nav-number">3.</span> <span class="nav-text">三：redis容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四：nodejs容器"><span class="nav-number">4.</span> <span class="nav-text">四：nodejs容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五：nginx容器"><span class="nav-number">5.</span> <span class="nav-text">五：nginx容器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#六-docker常用命令"><span class="nav-number">6.</span> <span class="nav-text">六: docker常用命令</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

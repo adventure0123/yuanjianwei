@@ -1,0 +1,566 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="bitmap,bloom filter," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;问题：如何防止用户恶意刷商品的关注数。假设现在有1000个商品，每一个商品都有几万人关注，最坏情况每个商品有1000W人关注。每个用户可以关注或者取消某个商品。">
+<meta name="keywords" content="bitmap,bloom filter">
+<meta property="og:type" content="article">
+<meta property="og:title" content="bitmap">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/07/22/bitmap/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;问题：如何防止用户恶意刷商品的关注数。假设现在有1000个商品，每一个商品都有几万人关注，最坏情况每个商品有1000W人关注。每个用户可以关注或者取消某个商品。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/bloom%20filter.png">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="bitmap">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;问题：如何防止用户恶意刷商品的关注数。假设现在有1000个商品，每一个商品都有几万人关注，最坏情况每个商品有1000W人关注。每个用户可以关注或者取消某个商品。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/bloom%20filter.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> bitmap | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                bitmap
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-22T22:37:43+08:00" content="2016-07-22">
+              2016-07-22
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;问题：如何防止用户恶意刷商品的关注数。假设现在有1000个商品，每一个商品都有几万人关注，最坏情况每个商品有1000W人关注。每个用户可以关注或者取消某个商品。<a id="more"></a>商品的有效期是一天，每过一天商品都会换另一批。现在的做法是在redis中使用hash来保存商品的关注数，主键是日期，field是商品的skuid，value是用户的关注数量，主键的过期日期是24小时。这样做的好处是不用储存用户的信息，省redis内存，占用带宽少，操作速度快。但也导致了一个问题，有一部分人恶意刷高或者刷少某个商品的关注数。因为无法验证关注或者取消请求的合法性，导致不能杜绝用户的刷关注行为。<br>&emsp;&emsp;为了解决这个问题，我们需要退出一个防刷功能。第一个方案是把用户的唯一标示记录下来。用户的每个请求都会带一个40字节的uuid，标示用户的信息。假设我们使用redis的set结构，key是商品的skuid,value是用户的uuid.如果用户对某个商品进行关注，首先查看set中是否有用户的uuid，如果没有则关注成功，将用户的uuid加入set中，如果set中已经有了用户的uuid则说明用户已经关注了，关注不成功。当用户取消的时候，进行相同的逻辑。这个方法能够从根本上解决用户恶意刷评论的行为，该方法对小数据量非常的有效，但是如果用户量上升将会导致占用大量的内存。例如每个商品关注的用户是1000W，总共1000个商品，将会占用：40<em>100000000</em>1000/1024/1024/1024=372.5G,占用了太多的内存，而且对服务器的带宽也是一个很大的压力。<br>&emsp;&emsp;因为用户的关注数不一定严格要求不能有任何误差，因此我们可以考虑用布隆过滤器。bloom filter是一种空间效率很高的随机数据结构，它可以看做是bitmap的扩展，它的主要原理是：当一个元素被加入时，首先通过K个hash函数将元素映射成位阵列的k个点，并置为1.当检索时，同样将被检索的元素映射为k个点。如果有其中一个点为0，则说明元素不在集合中。如果所有的k个点都为1，则说明有很大的概率元素存在集合中。布隆过滤器的示意图如下：<br><img src="../../../../img/bloom filter.png" alt="docker"><br>{z,y,z}是一个集合，彩色的线表示集合中的每一个元素都被映射到bit数组的多个位上。元素w不在集合中，因为他被映射到的bit数组中存在0。布隆过滤器的优点是空间效率和查询效率都远远超过一般的算法，布隆过滤器的插入和查询的时间复杂度都是O(k),另外散列函数之间没有联系，方便硬件实现。布隆过滤器本生不保存密码，适用于一些对安全性有较高要求的应用。但布隆过滤器也存在以下一些缺点：随着插入元素的增加，误差率也随之增加。另一方面，布隆过滤器不支持从集合中删除元素。为了实现从集合中删除元素，我们可以使用布隆过滤器的变种，counter bloom filter.counter bloomfilter是将布隆过滤器的每一位扩展成一个小的计数器，在插入时，分别对k位加1，删除时则分别减1.counter bloom filter通过占用几倍的存储空间，解决了布隆过滤器的删除问题。布隆过滤器通过只占哈希表的1/4到1/8的空间，就能解决相同的问题。在这个实际使用中，我们使用counter bloom filter，在1000W关注数，并且误差在0.1%左右时，使用的空间大约降低了一倍。<br>&emsp;&emsp;为了进一步降低内存，我们可以采用bitmap来存储用户的信息。首先使用hash函数，将用户的uuid映射为一个32位的正整数,同时初始化一个长度为2^32次方长度的bitmap,bitmap的每一位对应用户的一个id.当用户关注则将bitmap相应的位数置1，取消关注则置为0.通过redis,我们可以方便的使用bitset和getbit操作和查询bitmap的每一位。2^32次方长度的bitmap大约占用16M的内存，因此我们只需要大约16G的内存，并且冲突在百分之零点几的情况下就完美的解决了问题，同时也大大的减少了带宽的使用。在实际使用中，因为商品的关注人数一般只有几万到十几万的规模，因此我们综合考虑只使用hash之后32位整数的中间24位，在插入在几万的情况下，冲突大约为百分之0.3，在插入在100W的情况下冲突为百分之1.2，基本满足了我们的需求。这次通过实际问题，综合考虑内存，误差和带宽，比较了多种解决方案的优劣，最后较为圆满的解决了问题，因为把这个解决过程记录下来，供后来的人参考。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/bitmap/" rel="tag">#bitmap</a>
+          
+            <a href="/yuanjianwei/tags/bloom-filter/" rel="tag">#bloom filter</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/10/09/package/" rel="next" title="package">
+                <i class="fa fa-chevron-left"></i> package
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/07/05/springIoc/" rel="prev" title="springIoc">
+                springIoc <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">此文章未包含目录</p>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

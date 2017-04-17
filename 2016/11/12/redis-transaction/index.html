@@ -1,0 +1,578 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis,redis transaction," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;redis通过multi，exec,watch等命令来实现事务功能。">
+<meta name="keywords" content="redis,redis transaction">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis_transation">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/11/12/redis-transaction/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;redis通过multi，exec,watch等命令来实现事务功能。">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis_transation">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;redis通过multi，exec,watch等命令来实现事务功能。">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> redis_transation | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                redis_transation
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-12T23:53:38+08:00" content="2016-11-12">
+              2016-11-12
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;redis通过multi，exec,watch等命令来实现事务功能。<a id="more"></a>事务提供了一种将命令请求打包，然后一次性按照顺序的执行，执行的过程中不会插入其他的命令。并且在事务的执行过程中，服务器不会中断事务去执行其他的客户端请求。<br>&emsp;&emsp;redis的事务从开始到结束通常会经历以下三个过程：1，事务开始。2，命令入队。3，事务执行。以下是一个事务的执行过程，该事务首先以一个multi命令开始，接着将多个命令放入事务中。最后由exec命令将这个事务提交给服务器执行。<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt;multi</div><div class="line">OK</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt;<span class="keyword">set</span> redis transaction</div><div class="line">QUEUED</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt;exec</div><div class="line">OK</div></pre></td></tr></table></figure></p>
+<p>redis的事务和传统的关系型数据库事务最大的区别在于，redis不支持事务的回滚机制。即使事务队列中的某个命令在执行期间出现了错误，整个事务也会执行下去，直到将事务中的所有命令都执行完毕为止。如果一个事务在入队的过程中，出现命令不存在，或者命令的格式不正确等情况，那么redis将会拒绝执行这个事务。<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; multi</div><div class="line">OK</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; in redis</div><div class="line">(error) ERR unknown <span class="keyword">command</span> <span class="string">'in'</span></div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; exec</div><div class="line">(error) EXECABORT Transaction discarded because of <span class="keyword">previous</span> errors.</div></pre></td></tr></table></figure></p>
+<p>除了入队可能发生的错误以外，事务还可能在执行的过程中出现错误。这些错误都是一些不能再入队时被服务器发现的错误，这些错误只会在命令执行时被触发。即使事务在执行的过程中发生了错误，服务器也不会中断事务的执行，它会继续执行事务中余下的命令，并且已经执行的命令不会被出错的命令影响。对数据库的键执行了错误的类型操作是事务执行期间最常见的错误之一。首先我们用set命令把redis设置为hello，然后执行sadd命令，这将会引发错误，并且错误只能在事务执行过程中才能被发现。<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; <span class="keyword">set</span> redis hello</div><div class="line">OK</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; multi</div><div class="line">OK</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; sadd redis test</div><div class="line">QUEUED</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; exec</div><div class="line"><span class="number">1</span>) (error) WRONGTYPE Operation against <span class="keyword">a</span> key holding the wrong kind of value</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt;</div></pre></td></tr></table></figure></p>
+<p>&emsp;&emsp;如果redis服务器在执行过程中停机，那么根据服务器所使用的持久化模式，可能有以下情况的发生：</p>
+<ul>
+<li><p>1 如果服务器运行在无持久化的内存模式下，那么重启之后数据库将是空白的。</p>
+</li>
+<li><p>2 如果服务器运行在rdb模式下，那么在事务过程中停机不会导致不一致，因为服务会根据现有的rdb文件来恢复数据，从而将数据库还原到一个一致的状态。如果找不到可供使用的rdb文件，那么重启之后数据将会是空白的</p>
+</li>
+<li><p>3 如果服务器运行在aof模式下，那么事务在中途停机也不会导致不一致。因为服务可以根据现有的aof文件来恢复，从而将数据库还原到一个一致的状态。如果找不到可供使用的aof文件，那么数据库将会是空白的。</p>
+</li>
+</ul>
+<p>综上所述，无论数据库运行在哪种模式下，事务执行过程中的停机都不会影响数据库的一致性。</p>
+<p>&emsp;&emsp;从上面的例子中可以看出，数据库运行在事务过程中，只有在事务结束时才返回结果。但如果事务中的命令依赖于上一条的命令该怎么办，例如实现i++。假设两个客户端a,b同时获取到key A的value是1，然后客户端b执行事务A++，客户端执行事务A++，最后得到的结果将会是A=2，而不是正确的结果3。为了解决这个问题redis，提供了watch命令。watch命令是一个乐观锁，他可以在exec命令执行前，监控任意数量的数据库键，并在exec执行时，检查被监控的键是否至少有一个已经被修改过了，如果是的话，将拒绝执行事务，并向客户端返回失败的空回复。例如：<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">客户端A监控key：</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; watch redis</div><div class="line">OK</div><div class="line">客户端B修改key：</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; <span class="keyword">set</span> redis <span class="number">2</span></div><div class="line">OK</div><div class="line">客户端A执行事务：</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; multi</div><div class="line">OK</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; <span class="keyword">set</span> redis <span class="number">1</span></div><div class="line">QUEUED</div><div class="line"><span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">6379</span>&gt; exec</div><div class="line">(nil)</div></pre></td></tr></table></figure></p>
+<p>执行exec之后将会取消所有所有watch监控的key</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/redis/" rel="tag">#redis</a>
+          
+            <a href="/yuanjianwei/tags/redis-transaction/" rel="tag">#redis transaction</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/11/20/redis-cluster/" rel="next" title="redis-cluster">
+                <i class="fa fa-chevron-left"></i> redis-cluster
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/10/09/package/" rel="prev" title="package">
+                package <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <p class="post-toc-empty">此文章未包含目录</p>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

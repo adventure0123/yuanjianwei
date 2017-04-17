@@ -1,0 +1,604 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="webbench,websocket bench,nodejs," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本文主要介绍两款网站压力测试工具，webbench和websocket bench，并且测试单机nodejs和socket.io的性能。">
+<meta name="keywords" content="webbench,websocket bench,nodejs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="webbench">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/05/29/webbench/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="本文主要介绍两款网站压力测试工具，webbench和websocket bench，并且测试单机nodejs和socket.io的性能。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/100-c.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/1000-c.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/3500-c.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/10000-c.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/20000-c.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/chat.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/100-a.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/1000-a.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/2000-a.png">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="webbench">
+<meta name="twitter:description" content="本文主要介绍两款网站压力测试工具，webbench和websocket bench，并且测试单机nodejs和socket.io的性能。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/100-c.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> webbench | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                webbench
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-05-29T22:54:53+08:00" content="2016-05-29">
+              2016-05-29
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文主要介绍两款网站压力测试工具，webbench和websocket bench，并且测试单机nodejs和socket.io的性能。<a id="more"></a>webbench作为一款有名的网站压力测试工具，其主要特点是使用简单，功能较为丰富。其主要测试内容为每秒钟的请求数和每秒钟传输数据量。webbench不仅具有测试静态页面的能力，也能对动态页面进行测试，本文采用webbench测试单机nodejs的性能。websocket bench是一款能够用来测试websocket服务性能的工具，暂时支持Socket.IO，Engine.IO，Faye，Primus，WAMP等框架的测试。Socket.io作为一个实现websocket协议的nodejs框架，因为实现了服务器和浏览器的常连接，因此测试较为困难，本位采用websocket bench对其进行性能测试。</p>
+<h3 id="一：webbench的安装"><a href="#一：webbench的安装" class="headerlink" title="一：webbench的安装"></a>一：webbench的安装</h3><p>webbench的安装需要依赖ctags,因此在安装webbench之前需要先安装ctags。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo apt-get install ctags</div></pre></td></tr></table></figure>
+<p>安装好ctags之后，下载安装包并解压编译</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">wget http://blog.s135.com/soft/linux/webbench/webbench-1.5.tar.gz</div><div class="line">tar zxvf webbench-1.5.tar.gz</div><div class="line"><span class="built_in">cd</span> webbench-1.5</div><div class="line">make &amp;&amp; make install</div></pre></td></tr></table></figure>
+<h3 id="二：webbench的使用"><a href="#二：webbench的使用" class="headerlink" title="二：webbench的使用"></a>二：webbench的使用</h3><p>webbench使用非常简单，可以输入help查看命令。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">webbench --help</div><div class="line">webbench [option]... URL</div><div class="line"> <span class="_">-f</span>|--force               Don<span class="string">'t wait for reply from server.</span></div><div class="line"> -r|--reload              Send reload request - Pragma: no-cache.</div><div class="line"> -t|--time &lt;sec&gt;          Run benchmark for &lt;sec&gt; seconds. Default 30.</div><div class="line"> -p|--proxy &lt;server:port&gt; Use proxy server for request.</div><div class="line"> -c|--clients &lt;n&gt;         Run &lt;n&gt; HTTP clients at once. Default one.</div><div class="line"> -9|--http09              Use HTTP/0.9 style requests.</div><div class="line"> -1|--http10              Use HTTP/1.0 protocol.</div><div class="line"> -2|--http11              Use HTTP/1.1 protocol.</div><div class="line"> --get                    Use GET request method.</div><div class="line"> --head                   Use HEAD request method.</div><div class="line"> --options                Use OPTIONS request method.</div><div class="line"> --trace                  Use TRACE request method.</div><div class="line"> -?|-h|--help             This information.</div><div class="line"> -V|--version             Display program version.</div></pre></td></tr></table></figure></p>
+<p>常用参数说明，-c表示客户端数量，-t表示时间。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">webbench -c 500  -t  30   http://localhost:8080</div></pre></td></tr></table></figure></p>
+<h3 id="三：Linux文件句柄数量受限制"><a href="#三：Linux文件句柄数量受限制" class="headerlink" title="三：Linux文件句柄数量受限制"></a>三：Linux文件句柄数量受限制</h3><p>默认情况下，linux用户能够打开的文件句柄数为1024,可以通过ulimit命令进行查看。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">ulimit</span> -n</div><div class="line">1024</div></pre></td></tr></table></figure></p>
+<p>也就是说在默认情况下，基于Linux的通讯最多允许同时1024个tcp并发连接。想要获得更高的tcp并发连接数，就必须修改Linux对用户进程可同时打开的文件数量的软限制和硬限制。其中</p>
+<ul>
+<li>软限制是指linxu在当前系统能够承受的范围内进一步限制用户同时打开文件的数量</li>
+<li><p>硬限制是指根据系统硬件资源状况计算出来的系统最多能够同时打开的文件数量。<br>修改单一进程能够同时打开文件句柄数主要有两种方法：</p>
+</li>
+<li><p>1,直接使用ulimit命令</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">ulimit</span> -n 4096</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>但是该方法设置的值只能在当前终端生效，并且设置的值不能高于硬连接数。</p>
+<ul>
+<li>2,修改/etc/security/limits.conf文件，添加或者修改<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">* soft nofile 1048576</div><div class="line">* hard nofile 1048576</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>其中*表示对所有用户有效，soft表示软限制，hard表示硬限制，超过这个阈值，将会报错。nofile表示文件打开的最大数量。1028576是每个进程打开的文件句柄数，超过这个数需要重新编译Linux内核。</p>
+<h3 id="四：webbench测试结果"><a href="#四：webbench测试结果" class="headerlink" title="四：webbench测试结果"></a>四：webbench测试结果</h3><p>本文采用express框架实现了一个简单的nodejs项目，并采用webbench测试其主页性能。本文测试环境为：ubutun 14.04，4G内存，酷睿双核，内网环境下。<br>以下分别为100，1000，3500，10000和20000客户端下的性能。<br><img src="../../../../img/100-c.png" alt="docker"><br><img src="../../../../img/1000-c.png" alt="docker"><br><img src="../../../../img/3500-c.png" alt="docker"><br><img src="../../../../img/10000-c.png" alt="docker"><br><img src="../../../../img/20000-c.png" alt="docker"><br>从以上测试结果来看，在单机情况下，当客户端连接数量在3500时，服务较为稳定，当客户端连接数达到10000时，服务开始变的不稳定，当连接数达到20000时，服务基本不可用。在实验过程中发现，当连接数达到几K时，服务的cup直线飙升达到90%以上，但是内存相对变化不是很大。</p>
+<h3 id="五：websocket-bench安装"><a href="#五：websocket-bench安装" class="headerlink" title="五：websocket bench安装"></a>五：websocket bench安装</h3><p>直接使用以下命令安装：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">npm install -g websocket-bench</div></pre></td></tr></table></figure></p>
+<h3 id="六：websocket-bench的使用"><a href="#六：websocket-bench的使用" class="headerlink" title="六：websocket bench的使用"></a>六：websocket bench的使用</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">websocket-bench --help</div><div class="line">Usage: websocket-bench [options] &lt;server&gt;</div><div class="line"></div><div class="line">Options:</div><div class="line"></div><div class="line">  -h, --help               Output usage information</div><div class="line">  -V, --version            Output the version number</div><div class="line">  <span class="_">-a</span>, --amount &lt;n&gt;         Total number of persistent connection, Default to 100</div><div class="line">  -c, --concurency &lt;n&gt;     Concurent connection per second, Default to 20</div><div class="line">  -w, --worker &lt;n&gt;         Number of worker(s)</div><div class="line">  -g, --generator &lt;file&gt;   Js file <span class="keyword">for</span> generate message or special event</div><div class="line">  -m, --message &lt;n&gt;        Number of message <span class="keyword">for</span> a client. Default to 0</div><div class="line">  -o, --output &lt;output&gt;    Output file</div><div class="line">  -t, --type &lt;<span class="built_in">type</span>&gt;        Type of websocket server to bench(socket.io, engine.io, faye, primus, wamp). Default to socket.io</div><div class="line">  -p, --transport &lt;<span class="built_in">type</span>&gt;   Type of transport to websocket(engine.io, websockets, browserchannel, sockjs, socket.io). Default to websockets (Just <span class="keyword">for</span> Primus)</div><div class="line">  -k, --keep-alive         Keep alive connection</div><div class="line">  -v, --verbose            Verbose Logging</div></pre></td></tr></table></figure>
+<p>常用参数说明-a表示总的连接数，-c表示每秒并发连接数，-g可以指定特定的generate文件，-m 表示每个客户端的消息个数。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">websocket-bench <span class="_">-a</span> 100   -c 20   -g websocketBench.js  -m 1  -w 2 http://localhost:8080</div></pre></td></tr></table></figure></p>
+<p>其中的websocketBench.js格式如下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">module.exports = &#123;</div><div class="line">       /**</div><div class="line">        * Before connection (optional, just for faye)</div><div class="line">        * @param &#123;client&#125; client connection</div><div class="line">        */</div><div class="line">       beforeConnect : function(client) &#123;</div><div class="line">         // Example:</div><div class="line">         // client.setHeader('Authorization', 'OAuth abcd-1234');</div><div class="line">         // client.disable('websocket');</div><div class="line">       &#125;,</div><div class="line"></div><div class="line">       /**</div><div class="line">        * On client connectioonlinen (required)</div><div class="line">        * @param &#123;client&#125; client connection</div><div class="line">        * @param &#123;done&#125; callback function(err) &#123;&#125;</div><div class="line">        */</div><div class="line">       onConnect : function(client, done) &#123;</div><div class="line">         // Faye client</div><div class="line">         // client.subscribe('/channel', function(message) &#123; &#125;);</div><div class="line"></div><div class="line">         // Socket.io client</div><div class="line">         client.emit('online', &#123; userName: client.id &#125;);</div><div class="line"></div><div class="line">         // Primus client</div><div class="line">         // client.write('Sailing the seas of cheese');</div><div class="line"></div><div class="line">         // WAMP session</div><div class="line">         // client.subscribe('com.myapp.hello').then(function(args) &#123; &#125;);</div><div class="line"></div><div class="line">         done();</div><div class="line">       &#125;,</div><div class="line"></div><div class="line">       /**</div><div class="line">        * Send a message (required)</div><div class="line">        * @param &#123;client&#125; client connection</div><div class="line">        * @param &#123;done&#125; callback function(err) &#123;&#125;</div><div class="line">        */</div><div class="line">       sendMessage : function(client, done) &#123;</div><div class="line">         // Example:</div><div class="line">          client.emit('chat', &#123;from:client.id,to:'all',msg:'hello'&#125;);</div><div class="line">         // client.publish('/test', &#123; hello: 'world' &#125;);</div><div class="line">         // client.call('com.myapp.add2', [2, 3]).then(function (res) &#123; &#125;);</div><div class="line">         done();</div><div class="line">       &#125;,</div><div class="line"></div><div class="line">       /**</div><div class="line">        * WAMP connection options</div><div class="line">        */</div><div class="line">       options : &#123;</div><div class="line">         // realm: 'chat'</div><div class="line">       &#125;</div><div class="line">    &#125;;</div></pre></td></tr></table></figure></p>
+<h3 id="七：测试结果"><a href="#七：测试结果" class="headerlink" title="七：测试结果"></a>七：测试结果</h3><p>本文采用socket.io实现了一个简单的聊天室，每一个登录的人可以对所有的人说话。测试环境为：ubutun 14.04，4G内存，单核，服务和测试工具都运行在同一台vitualbox虚拟机中。<br><img src="../../../../img/chat.png" alt="docker"><br><img src="../../../../img/100-a.png" alt="docker"><br><img src="../../../../img/1000-a.png" alt="docker"><br><img src="../../../../img/2000-a.png" alt="docker"><br>经过多次测试得知，在广播的情况下，服务端最多能够接受1000个左右的连接，未广播的情况下，服务端大概能接受2000个左右的连接。上述数据只在特定的情况下测试，仅供参考。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/webbench/" rel="tag">#webbench</a>
+          
+            <a href="/yuanjianwei/tags/websocket-bench/" rel="tag">#websocket bench</a>
+          
+            <a href="/yuanjianwei/tags/nodejs/" rel="tag">#nodejs</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/06/02/redis/" rel="next" title="redis cluster">
+                <i class="fa fa-chevron-left"></i> redis cluster
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/05/25/docker/" rel="prev" title="docker">
+                docker <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一：webbench的安装"><span class="nav-number">1.</span> <span class="nav-text">一：webbench的安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二：webbench的使用"><span class="nav-number">2.</span> <span class="nav-text">二：webbench的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三：Linux文件句柄数量受限制"><span class="nav-number">3.</span> <span class="nav-text">三：Linux文件句柄数量受限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四：webbench测试结果"><span class="nav-number">4.</span> <span class="nav-text">四：webbench测试结果</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五：websocket-bench安装"><span class="nav-number">5.</span> <span class="nav-text">五：websocket bench安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#六：websocket-bench的使用"><span class="nav-number">6.</span> <span class="nav-text">六：websocket bench的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#七：测试结果"><span class="nav-number">7.</span> <span class="nav-text">七：测试结果</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

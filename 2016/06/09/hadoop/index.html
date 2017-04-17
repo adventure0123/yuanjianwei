@@ -1,0 +1,647 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="hadoop,Pseudo-Distributed," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Hadoop是一个能对大量数据进行分布式处理的软件框架，本文主要介绍单机伪分布式Hadoop的配置。">
+<meta name="keywords" content="hadoop,Pseudo-Distributed">
+<meta property="og:type" content="article">
+<meta property="og:title" content="hadoop">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/06/09/hadoop/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="Hadoop是一个能对大量数据进行分布式处理的软件框架，本文主要介绍单机伪分布式Hadoop的配置。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/hadoop-architecture.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/java-version.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/NameNode.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/hadoop-output.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/apps.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jobs.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jobs2.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jobs3.png">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="hadoop">
+<meta name="twitter:description" content="Hadoop是一个能对大量数据进行分布式处理的软件框架，本文主要介绍单机伪分布式Hadoop的配置。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/hadoop-architecture.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> hadoop | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                hadoop
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-06-09T16:59:21+08:00" content="2016-06-09">
+              2016-06-09
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Hadoop是一个能对大量数据进行分布式处理的软件框架，本文主要介绍单机伪分布式Hadoop的配置。<a id="more"></a>Hadoop最核心的设计就是：HDFS和MapReducue。HDFS提供了海量数据的存储，MapReduce提供了对数据的计算。Hadoop集群主要由NameNode，DataNode，Secondary NameNode,JobTracker,TaskTracker组成。NameNode记录了文件如何被拆分成block以及这些block都被存储到了哪些DataNode节点，同时NameNode也同时保存了文件系统运行的状态信息。DataNode中存储这些被拆分的blocks。Secondary NameNode帮助NameNode收集文件系统的运行状态信息。JobTracker负责调度多个JobTracker的运行。JobTracker负责某一个map或者reduce任务。其结构如下图所示：<br><img src="../../../../img/hadoop-architecture.png" alt="docker"><br>上面介绍了Hadoop的一些基础知识，下面将会介绍如何配置单机的Hadoop系统。本教程的环境为64位的Ubutun 14.04，Hadoop版本为2.6.4。</p>
+<h4 id="一：安装Java"><a href="#一：安装Java" class="headerlink" title="一：安装Java"></a>一：安装Java</h4><ul>
+<li><p>1 首先到oracle官网下载最新的jdk，然后解压到local目录下。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">sudo mkdir /usr/<span class="built_in">local</span>/java</div><div class="line">cp jdk-8u91-linux-x64.tar.gz /usr/<span class="built_in">local</span>/java</div><div class="line"><span class="built_in">cd</span> /usr/<span class="built_in">local</span>/java</div><div class="line">sudo tar xvf jdk-8u91-linux-x64.tar.gz</div></pre></td></tr></table></figure>
+</li>
+<li><p>2 最后配置环境变量，这里我采用全局设置的方法<br>打开.bashrc文件，在文件末尾追加路径。   </p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">vim ~./bashrc</div><div class="line"><span class="built_in">export</span> JAVA_HOME=/usr/<span class="built_in">local</span>/java/jdk1.8.0_91</div><div class="line"><span class="built_in">export</span> PATH=<span class="variable">$PATH</span>:<span class="variable">$JAVA_HOME</span>/bin</div></pre></td></tr></table></figure>
+</li>
+<li><p>3 检验是否安装成功<br>在终端输入如下命令：</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -version</div></pre></td></tr></table></figure>
+<p>  成功则显示如下：<br>  <img src="../../../../img/java-version.png" alt="docker"></p>
+</li>
+</ul>
+<h4 id="二：安装Hadoop"><a href="#二：安装Hadoop" class="headerlink" title="二：安装Hadoop"></a>二：安装Hadoop</h4><p>集群和单机模式都需要ssh登录，因此在安装Hadoop前确保系统已经安装了ssh,安装后，可以使用以下命令登录本地。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ssh localhost</div></pre></td></tr></table></figure></p>
+<p>之后从Apache官网下载需要的Hadoop版本，这里我下载的是hadoop 2.6.4。解压之后进入Hadoop目录，打开etc/hadoop/hadoop-env.sh中Java的路径。<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"># <span class="keyword">set</span> <span class="keyword">to</span> the root of your Java installation</div><div class="line"> export JAVA_HOME=/usr/local/java/jdk1.<span class="number">8.0</span>_91</div></pre></td></tr></table></figure></p>
+<p>可以查看Hadoop的用法。<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./bin/hadoop</div></pre></td></tr></table></figure></p>
+<h4 id="三：伪分布式配置"><a href="#三：伪分布式配置" class="headerlink" title="三：伪分布式配置"></a>三：伪分布式配置</h4><ul>
+<li><p>1 Hadoop的配置文件都位于etc/hadoop目录下，伪分布式需要修改两个配置文件core-site.xml和hafs-site.xml。每个配置文件都以property的name和value方式来实现。<br>core-site.xml的配置如下：</p>
+  <figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">&lt;configuration&gt;</span></div><div class="line">    <span class="symbol">&lt;property&gt;</span></div><div class="line">        <span class="symbol">&lt;name&gt;</span>fs.defaultFS&lt;/name&gt;</div><div class="line">        <span class="symbol">&lt;value&gt;</span>hdf<span class="variable">s:</span>//localhos<span class="variable">t:9000</span>&lt;/value&gt;</div><div class="line">    &lt;/property&gt;</div><div class="line">&lt;/configuration&gt;</div></pre></td></tr></table></figure>
+<p>  hdfs-site.xml的配置如下：</p>
+  <figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">&lt;configuration&gt;</span></div><div class="line">    <span class="symbol">&lt;property&gt;</span></div><div class="line">        <span class="symbol">&lt;name&gt;</span>dfs.replication&lt;/name&gt;</div><div class="line">        <span class="symbol">&lt;value&gt;</span><span class="number">1</span>&lt;/value&gt;</div><div class="line">    &lt;/property&gt;</div><div class="line">&lt;/configuration&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2 修改完配置之后，格式化文件系统。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/hdfs namenode -format</div></pre></td></tr></table></figure>
+</li>
+<li><p>3 启动NameNode和DataNode的守护进程。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sbin/start-dfs.sh</div></pre></td></tr></table></figure>
+<p>  打开浏览器，输入<a href="http://localhost:50070/可以查看NameNode的界面。" target="_blank" rel="external">http://localhost:50070/可以查看NameNode的界面。</a><br>  <img src="../../../../img/NameNode.png" alt="docker"></p>
+</li>
+<li><p>4 创建hdfs目录</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">bin/hdfs dfs -mkdir /user</div><div class="line">bin/hdfs dfs -mkdir /user/&lt;username&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>5 将input中的文件拷贝到hdfs中</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/hafs dfs -put etc/hadoop input</div></pre></td></tr></table></figure>
+<p>  input中是要被统计单词出现次数的文本。可以把Hadoop的配置文件放入input目录中，统计单词次数。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cp etc/hadoop/*.xml input</div></pre></td></tr></table></figure>
+</li>
+<li><p>6 运行Hadoop提供的例子</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/hadoop jar share/hadoop/mapreduce/hadoop-mapreduce-examples-2.6.4.jar grep input output <span class="string">'dfs[a-z.]+'</span></div></pre></td></tr></table></figure>
+</li>
+<li><p>7 查看结果<br>  可以将hafs中的结果拷贝到本地文件系统查看</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">bin/hdfs dfs -get output output</div><div class="line">cat output /*</div></pre></td></tr></table></figure>
+<p>  也可以直接在hdfs上查看结果</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/hdfs dfs -cat output/*</div></pre></td></tr></table></figure>
+<p>  因为输入不一样，每个人的结果不近相同。<br>  <img src="../../../../img/hadoop-output.png" alt="docker"></p>
+</li>
+<li><p>8 关闭守护进程</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sbin/stop-dfs.sh</div></pre></td></tr></table></figure>
+<p>  注意因为Hadoop只会追加文件，因此每次执行Hadoop任务都要先删除output目录，不然会报错。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bin/hdfs dfs -rm -r output</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<h4 id="四：启动yarn"><a href="#四：启动yarn" class="headerlink" title="四：启动yarn"></a>四：启动yarn</h4><p>伪分布式系统不启动yarn也可以，一般不会影响程序执行，但是为了学习这里我们也对其进行配置。上述启动Hadoop仅仅是启动了MapReduce环境，我们可以启动yarn，让yarn来负责资源的管理和任务的调度。</p>
+<ul>
+<li><p>1 配置<br>  首先修改配置文件mapred-site.xml，这里需要先对其重命名。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">cp ./etc/hadoop/mapred-site.xml.template ./etc/hadoop/mapred-site.xml</div></pre></td></tr></table></figure>
+<p>  然后修改mapred-site.xml</p>
+  <figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">&lt;configuration&gt;</span></div><div class="line">    <span class="symbol">&lt;property&gt;</span></div><div class="line">        <span class="symbol">&lt;name&gt;</span>mapreduce.framework.name&lt;/name&gt;</div><div class="line">        <span class="symbol">&lt;value&gt;</span>yarn&lt;/value&gt;</div><div class="line">    &lt;/property&gt;</div><div class="line">&lt;/configuration&gt;</div></pre></td></tr></table></figure>
+<p>  修改yarn-site.xml</p>
+  <figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="symbol">&lt;configuration&gt;</span></div><div class="line">    <span class="symbol">&lt;property&gt;</span></div><div class="line">        <span class="symbol">&lt;name&gt;</span>yarn.nodemanager.aux-services&lt;/name&gt;</div><div class="line">        <span class="symbol">&lt;value&gt;</span>mapreduce_shuffle&lt;/value&gt;</div><div class="line">    &lt;/property&gt;</div><div class="line">&lt;/configuration&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2 启动ResourceManager和NodeManager守护进程。</p>
+   <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sbin/start-yarn.sh</div></pre></td></tr></table></figure>
+<p>   这时输入jps可以查看，系统多了ResourceManager和NodeManager<br>  两个后台进程。</p>
+<p>  在浏览器能够查看ResourceManager，默认情况下端口为8088，<a href="http://localhost:8088/。" target="_blank" rel="external">http://localhost:8088/。</a><br>  <img src="../../../../img/apps.png" alt="docker"></p>
+</li>
+<li><p>3 启动历史服务器<br>  Hadoop默认情况下没有开启历史服务器。</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./sbin/mr-jobhistory-daemon.sh start historyserver</div></pre></td></tr></table></figure>
+<p>  这样就能在web中查看任务的运行情况。</p>
+</li>
+<li><p>4 关闭yarn</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">./sbin/stop-yarn.sh</div><div class="line">./sbin/mr-jobhistory-daemon.sh stop historyserver</div></pre></td></tr></table></figure>
+<p>  <img src="../../../../img/jobs.png" alt="docker"><br>  <img src="../../../../img/jobs2.png" alt="docker"><br>  <img src="../../../../img/jobs3.png" alt="docker"></p>
+</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/hadoop/" rel="tag">#hadoop</a>
+          
+            <a href="/yuanjianwei/tags/Pseudo-Distributed/" rel="tag">#Pseudo-Distributed</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/06/28/java-class/" rel="next" title="java class">
+                <i class="fa fa-chevron-left"></i> java class
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/06/02/redis/" rel="prev" title="redis cluster">
+                redis cluster <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一：安装Java"><span class="nav-number">1.</span> <span class="nav-text">一：安装Java</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二：安装Hadoop"><span class="nav-number">2.</span> <span class="nav-text">二：安装Hadoop</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三：伪分布式配置"><span class="nav-number">3.</span> <span class="nav-text">三：伪分布式配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四：启动yarn"><span class="nav-number">4.</span> <span class="nav-text">四：启动yarn</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

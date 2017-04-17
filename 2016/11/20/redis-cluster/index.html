@@ -1,0 +1,599 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="redis-cluster," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;emsp;&amp;emsp;随着数据量的增加，redis集群变的越来越必要，本文主要介绍redis cluster的安装和配置。">
+<meta name="keywords" content="redis-cluster">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis-cluster">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2016/11/20/redis-cluster/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="&amp;emsp;&amp;emsp;随着数据量的增加，redis集群变的越来越必要，本文主要介绍redis cluster的安装和配置。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/redis-cluster.jpg">
+<meta property="og:updated_time" content="2017-03-13T16:28:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="redis-cluster">
+<meta name="twitter:description" content="&amp;emsp;&amp;emsp;随着数据量的增加，redis集群变的越来越必要，本文主要介绍redis cluster的安装和配置。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/redis-cluster.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> redis-cluster | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                redis-cluster
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-20T00:29:58+08:00" content="2016-11-20">
+              2016-11-20
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>&emsp;&emsp;随着数据量的增加，redis集群变的越来越必要，本文主要介绍redis cluster的安装和配置。<a id="more"></a>redis cluster是redis 3.0之后才引入的新功能，在之前的版本中实现redis集群主要使用twitter发布的Twemproxy。（<a href="https://github.com/twitter/twemproxy）" target="_blank" rel="external">https://github.com/twitter/twemproxy）</a></p>
+<h4 id="一：redis-cluster介绍"><a href="#一：redis-cluster介绍" class="headerlink" title="一：redis cluster介绍"></a>一：redis cluster介绍</h4><p>&emsp;&emsp;redis集群是redis提供的分布式数据库方案，集群通过分片来进行数据的共享，并提供复制和故障转换功能。redis cluste在设计的时候，就考虑到了去中心化和去中间件，也就是说集群的所有节点都是平等的，每个节点保存各自的数据和整个集群的状态，每个节点和其他所有的节点相连，并且这些节点和所有节点保持联系，这样我们只需要连接集群中的任意一个节点就可以获取其他节点的数据。<br>&emsp;&emsp;redis cluster通过分片的方式保存数据库中的键值对：集群的整个数据库被分为16384个槽（slot）,每个分片对应一些槽，每个分片最少可以分配0个槽，最多分配16384个槽。当一个key进来时，会使用CRC16算法取key的hash值，然后对16384取模，然后根据模值，将key分配到对应redis分片上，具体公式为：CRC16（key）%16384.同时需要注意的是，要让集群正常工作至少需要3个主节点。假设我们现在已经有了3个节点组成的集群，A，B，C；并且3个节点分配的slot为：节点A，0-5460；节点B，5461-10922；节点C，10923-16383.假设我们现在需要设置一个key,比如my_name,按照redis cluster的哈希算法：CRC16（‘my_name’）%16384=2412,那么就会把这个key分配到节点A上。同样的，如果我们在集群中获取key=my_name的值时，也会跳转到B节点上获取数据。采用哈希槽的好处是：</p>
+<ul>
+<li>1 结构清晰。如果我要新加一个节点D，只需要从原来集群中拿出一部分slot指派给节点D，同样的如果要删除一个节点，只需要把这个节点的slot分配给其他的节点。redis cluster的拓扑结构如下图所示：<br><center><br><img src="../../../../img/redis-cluster.jpg" alt="docker"><br></center><br>&emsp;&emsp;redis cluster为了保证数据的高可用性，加入了主从模式，一个主节点对应一个或者多个从节点，主节点提供数据的存取，从节点负责数据的备份。当主节点挂掉之后，系统会从从节点中选出一个充当主节点，从而保证系统的可用性。在上面的例子中，如果没有为主节点配置从节点，那么当一个主节点挂掉之后，就无法再连接这个节点了。<h4 id="二：redis-cluster配置"><a href="#二：redis-cluster配置" class="headerlink" title="二：redis cluster配置"></a>二：redis cluster配置</h4>&emsp;&emsp;我们按照官方的教程，在一个机器上启动6个节点，3个为主节点，3个为从节点。</li>
+<li><p>1 解压</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar zxvf redis-<span class="number">3.0</span>.<span class="number">5</span>.tar.gz</div></pre></td></tr></table></figure>
+</li>
+<li><p>2 安装</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">cd</span> redis-<span class="number">3.0</span>.<span class="number">5</span></div><div class="line"><span class="keyword">make</span> &amp;&amp; <span class="keyword">make</span> install</div></pre></td></tr></table></figure>
+</li>
+<li><p>3 将redis-trib.rb复制到/usr/local/bin<br>redis-trib.rb是作者用ruby写的控制集群的脚步。</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">cd</span> src/</div><div class="line"><span class="keyword">cp</span> redis-trib.rb /usr/local/bin</div></pre></td></tr></table></figure>
+</li>
+<li><p>4 搭建集群<br>修改redis的配置文件</p>
+<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">vi</span> redis.<span class="keyword">conf</span></div><div class="line">#修改以下地方</div><div class="line">port <span class="number">7000</span></div><div class="line">cluster-enabled yes</div><div class="line">cluster-config-<span class="keyword">file</span> nodes.<span class="keyword">conf</span></div><div class="line">cluster-node-timeout <span class="number">5000</span></div><div class="line">appendonly yes</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>新建6个节点：<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">mkdir</span> <span class="number">7000</span></div><div class="line"><span class="built_in">mkdir</span> <span class="number">7001</span></div><div class="line"><span class="built_in">mkdir</span> <span class="number">7002</span></div><div class="line"><span class="built_in">mkdir</span> <span class="number">7003</span></div><div class="line"><span class="built_in">mkdir</span> <span class="number">7004</span></div><div class="line"><span class="built_in">mkdir</span> <span class="number">7005</span></div></pre></td></tr></table></figure></p>
+<p>将redis.conf分别拷贝到这6个文件夹中，并修改对应的端口号，并启动这个6个节点<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">cp</span> redis.<span class="keyword">conf</span> ./<span class="number">7000</span></div><div class="line">#修改端口号</div><div class="line">redis-server redis.<span class="keyword">conf</span></div><div class="line">.....</div><div class="line">`</div></pre></td></tr></table></figure></p>
+<p>将这个6个节点构成一个集群，需要用到的命令就是redis-trib.rb，这个是ruby写成的，首先你要下载ruby，然后再下载uby和redis的连接包。<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo apt-<span class="built_in">get</span> install <span class="keyword">ruby</span>-full</div><div class="line">gem install redis</div></pre></td></tr></table></figure></p>
+<ul>
+<li>5 启动节点<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib.rb create --replicas <span class="number">1</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7001</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7002</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7003</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7004</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7005</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>redis-trib会提示你需要做什么配置，输入yes接受，集群就被配置和加入了。测试集群的状态：<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib.rb check <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span></div></pre></td></tr></table></figure></p>
+<ul>
+<li>6测试连接集群<br>由于redis cluster的特点是去中心化，因此每个节点都是对等的，你连接任何一个节点都可以获取和设置数据。reids-cli是redis默认的客户端工具，启动时加‘-c’参数，开启redis cluster模式,通过加入-c命令，可以在输入的键值不在指定端口时，自动跳转到对应的端口。<figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">redis-cli -<span class="keyword">c</span> -<span class="keyword">p</span> <span class="number">7000</span></div><div class="line"><span class="keyword">set</span> my_name test</div><div class="line">Redirected <span class="keyword">to</span> slot [<span class="number">12803</span>] located at <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7002</span></div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>通过前面的介绍我们知道，在分配key的时候，他会使用CRC16算法，%16384来计算key的值，并将key分配到负责的slot上。由于负责该slot的分片不在7000上，所有直接跳到了7002该分片上。</p>
+<h4 id="三：redis-cluster测试"><a href="#三：redis-cluster测试" class="headerlink" title="三：redis cluster测试"></a>三：redis cluster测试</h4><p>如果7000主节点挂掉，由于7000下的从节点只有7003一个，那么7003就会被选举我master，并且数据不会丢失。如果7000节点重新起来，他将会成为7003的从节点。<br>将新节点加入集群的命令是add-node：<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib.rb <span class="built_in">add</span>-node <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7006</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span></div></pre></td></tr></table></figure></p>
+<p>7006是新加入的节点，7000表示集群的一个点，用来标示加入哪个集群，理论上集群中的任何节点都可以。加入集群之后，你会看到7006作为了master节点，但是他负责的slot为0，也就是说还没有分配任何槽给他，他不负责数据的存取。redis cluster在新节点加入的时候，不做迁移工作，需要我们对集群进行重新的分片迁移。<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib.rb reshard <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span></div></pre></td></tr></table></figure></p>
+<p>7000用来表示是哪个集群，端口填集群中的任何一个都行。之后集群会提示“How many slots do you want to move (from 1 to 16384)?”表示需要移动多少个槽，输入你想要迁移的数量之后，集群会提示“What is the receiving node ID?”你接受的node id是什么。输入7006节点的id之后提示，“Please enter all the source node IDs.<br>Type ‘all’ to use all the nodes as source nodes for the hash slots.<br>Type ‘done’ once you entered all the source nodes IDs.<br>-Source node #1:”，redis-trib会询问你重新分配的原节点，也即你需要从哪些节点中取出你需要的槽到新节点。<br>新加一个从节点的命令是：<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib.rb <span class="built_in">add</span>-node --slave <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7007</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span></div></pre></td></tr></table></figure></p>
+<p>–slave表示新加入的节点是从节点，但这样加入的从节点是随机的，他会成为任何一个主节点的从节点。如果你想从节点为指定主节点的slave,你可以指定master的id.<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib.rb <span class="built_in">add</span>-node --slave --master-id efc3131fbdc6cf929720e0e0f7136cae85657481 <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7008</span> <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span></div></pre></td></tr></table></figure></p>
+<p>–master-id表示要加入的主节点的id。<br>删除一个节点的命令是del-node.<br><figure class="highlight vim"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">redis-trib del-node <span class="number">127.0</span>.<span class="number">0.1</span>:<span class="number">7000</span> `<span class="symbol">&lt;node-id&gt;</span>`</div></pre></td></tr></table></figure></p>
+<p>需要注意的是，如果要删除的节点为从节点，那么cluster将会直接删除从节点。如果删除的节点是主节点，那么需要保证被删除的主节点负责的slot为0，如果slot不是0将会删除失败“Node 127.0.0.1:7007 is not empty! Reshard data away and try again.”，再删除之前需要先把slot分配给其他的主节点。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/redis-cluster/" rel="tag">#redis-cluster</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/yuanjianwei/2016/11/29/nginx/" rel="next" title="nginx">
+                <i class="fa fa-chevron-left"></i> nginx
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2016/11/12/redis-transaction/" rel="prev" title="redis_transation">
+                redis_transation <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#一：redis-cluster介绍"><span class="nav-number">1.</span> <span class="nav-text">一：redis cluster介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#二：redis-cluster配置"><span class="nav-number">2.</span> <span class="nav-text">二：redis cluster配置</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三：redis-cluster测试"><span class="nav-number">3.</span> <span class="nav-text">三：redis cluster测试</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>

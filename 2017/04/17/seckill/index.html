@@ -1,0 +1,572 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="seckill," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本文介绍一种秒杀场次自动切换的方法和系统。">
+<meta name="keywords" content="seckill">
+<meta property="og:type" content="article">
+<meta property="og:title" content="一种秒杀场次自动切换的方法和系统">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2017/04/17/seckill/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="本文介绍一种秒杀场次自动切换的方法和系统。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/seckill1.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/seckill2.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/seckill3.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/seckill5.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/seckill4.png">
+<meta property="og:updated_time" content="2017-04-17T13:44:53.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="一种秒杀场次自动切换的方法和系统">
+<meta name="twitter:description" content="本文介绍一种秒杀场次自动切换的方法和系统。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/seckill1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 一种秒杀场次自动切换的方法和系统 | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                一种秒杀场次自动切换的方法和系统
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-04-17T21:20:38+08:00" content="2017-04-17">
+              2017-04-17
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文介绍一种秒杀场次自动切换的方法和系统。<a id="more"></a></p>
+<h3 id="背景："><a href="#背景：" class="headerlink" title="背景："></a>背景：</h3><p>在电子商务领域中，秒杀场次的切换一直是难点之一。秒杀促销过程中，往往会有多个场次的秒杀商品，每隔一段时间就会进行场次的切换，当秒杀从一个场次切换到另一个场次，海量的客户端会同时对服务器发起请求，瞬时的巨大流量将会对服务器和数据库造成巨大的压力。<br>目前秒杀场次切换的技术方案一般是客户端展示秒杀场次开始倒计时，由用户在倒计时到0的时候手动刷新客户端请求服务器获取数据。具体流程如下：<br>1.用户在客户端手动刷新<br>2.客户端向服务器发送请求<br>3.服务器根据本机的时间判断是否应该切场<br>4.如果需要切场，则服务器从数据库中获取下一场次的数据<br>针对上面的参考方案，主要有以下几种缺点：<br>1.秒杀的切场依赖于用户主动的刷新，因此无法做到自动刷新场次，容易导致用户错失秒杀抢购时间区间，为了及时切换场次，在切场前后用户会频繁的刷新，间接加重了服务器和数据库的负担。<br>2．切场过程中，所有的客户端同时向服务器请求数据，会产生尖峰流量，对网络带宽和服务器造成巨大的压力。并且服务器同时去数据库中获取数据的过程，也会对数据库造成巨大的压力。<br>3．切场过程中网络和服务器资源紧张、系统响应慢会造成切场过程的不流畅，降低用户体验。<br>为了解决以上问题，本文提出了一种秒杀自动切场的方法和系统，在客户端采用数据预加载技术，将切场过程中瞬时流量前置平摊到一段时间内，在服务器端采用缓存技术，解决了现有方法切场过程中对带宽，服务器和数据库压力大、切场不及时、用户体验差等问题。</p>
+<h3 id="本文方法模块具体实现的模块如下："><a href="#本文方法模块具体实现的模块如下：" class="headerlink" title="本文方法模块具体实现的模块如下："></a>本文方法模块具体实现的模块如下：</h3><p>1.秒杀服务模块：负责接受通知模块的通知和处理客户端的请求，秒杀服务模块收到通知后从缓存模块获取下一个场次的秒杀数据放入本地缓存中，根据客户端的请求计算秒杀切场倒计时剩余时间和预加载提前的时间，并将结果和场次数据返回客户端。<br>2.缓存模块：负责缓存下一个场次的秒杀数据，将数据缓存到redis中。<br>3.通知模块：监控秒杀切场剩余时间，在秒杀切场前将下一场次秒杀数据从数据库写入缓存模块，并通过zookeeper通知秒杀服务模块获取下一个场次的秒杀数据。<br>4.统一时间中心：通过NTP协议确保秒杀服务模块中的所有机器和通知模块的时间统一，保证同一时刻切场。<br>5.客户端：向秒杀服务模块请求数据，根据预加载时间提前加载下一场次的数据，场次切换剩余时间为0后切换场次并负责展示数据。</p>
+<p><center><br><img src="../../../../img/seckill1.png" alt="docker"><br></center></p>
+<h3 id="对该技术方案的详细步骤描述如下："><a href="#对该技术方案的详细步骤描述如下：" class="headerlink" title="对该技术方案的详细步骤描述如下："></a>对该技术方案的详细步骤描述如下：</h3><ul>
+<li>1 ）通知模块将数据写入缓存模块并通知秒杀服务模块的流程如下：<br><img src="../../../../img/seckill2.png" alt="docker"><br>1.通知模块通过NTP协议将本机时间和统一时间中心同步<br>2.监控秒杀切场的剩余时间，如果剩余时间小于某个阈值则执行后续的操作<br>3.从数据库中获取下一场次的数据并写入缓存模块<br>4.通知模块通过zookeeper通知秒杀服务模块，数据已经写入缓存模块完毕<br>5.秒杀服务模块监听通知模块，如果收到通知则执行后续操作<br>6.秒杀服务模块收到通知之后，从缓存模块读取数据并写入本地的缓存中</li>
+<li>2） 秒杀服务模块处理客户端请求并返回结果<br><center><br><img src="../../../../img/seckill3.png" alt="docker"><br></center><br>1.秒杀服务模块通过NTP协议将本机时间和统一时间中心同步<br>2．接受客户端发送的请求<br>3.根据请求判断，是否需要预加载下一场次数据。如果需要预加载则获取下一场次数据<br>4.如果不需要预加载则根据本机时间判断是否需要切场，如果需要切场则服务器切换场次，更新本地场次信息，用下一个场次的数据替代当前场次数据，最后返回当前场次的数据。<br>5.重新计算秒杀切场剩余时间和预加载提前时间。提前预加载时间由如下公式确定：<br><center><br><img src="../../../../img/seckill5.png" alt="docker"><br></center><br>  T表示提前预加载时间，t表示当前时间，t1表示提前预加载最小时间，t2表示提前预加载最大时间。<br>6.将处理结果返回给客户端</li>
+<li>3 ）客户端切换场次<br><center><br><img src="../../../../img/seckill4.png" alt="docker"><br></center><br>1.客户端向秒杀服务模块发送请求<br>2.获取秒杀服务模块返回的场次切换倒计时和预加载提前时间<br>3.如果提前预加载时间为0为表示不提前预加载<br>4.如果提前预加载的时间不为0，则根据提前的时间向服务器发送请求，预加载下一场次的数据，并保存到客户端本地。<br>5.如果场次切换倒计时为0，则进行切场。如果已经预加载了数据，则不再向秒杀服务模块发送请求，直接使用本地预加载数据进行切场；如果未预加载数据，则向秒杀服务模块请求数据，得到数据之后进行切场<h3 id="本文提出的一种秒杀场次自动切换的方法和系统，具有以下的收益："><a href="#本文提出的一种秒杀场次自动切换的方法和系统，具有以下的收益：" class="headerlink" title="本文提出的一种秒杀场次自动切换的方法和系统，具有以下的收益："></a>本文提出的一种秒杀场次自动切换的方法和系统，具有以下的收益：</h3>1）实现自动切场的功能，用户不需要手动刷新数据进行切场，提高了场次切换的准确性和及时性，提升了用户的体验。<br>2）切场时间和预加载时间可以由后台动态控制。<br>3）随机的预加载时间分布减轻了切场瞬间尖峰流量对网络带宽和服务器的压力。<br>4）减轻了切场前后对数据库的压力，提高了数据的访问速度。</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/seckill/" rel="tag">#seckill</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2017/01/27/mocha/" rel="prev" title="mocha">
+                mocha <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">14</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#背景："><span class="nav-number">1.</span> <span class="nav-text">背景：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#本文方法模块具体实现的模块如下："><span class="nav-number">2.</span> <span class="nav-text">本文方法模块具体实现的模块如下：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对该技术方案的详细步骤描述如下："><span class="nav-number">3.</span> <span class="nav-text">对该技术方案的详细步骤描述如下：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#本文提出的一种秒杀场次自动切换的方法和系统，具有以下的收益："><span class="nav-number">4.</span> <span class="nav-text">本文提出的一种秒杀场次自动切换的方法和系统，具有以下的收益：</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
