@@ -1,0 +1,576 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/yuanjianwei/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/yuanjianwei/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/yuanjianwei/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="seckill," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/yuanjianwei/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="本文将从海量服务,卓越性能，高效可用等三方面分享探讨如何设计优化秒杀类系统，以及在实际问题中总结的宝贵经验。">
+<meta name="keywords" content="seckill">
+<meta property="og:type" content="article">
+<meta property="og:title" content="大规模高并发的挑战---揭秘秒杀后台系统">
+<meta property="og:url" content="http://adventure0123.github.io/yuanjianwei/2017/08/05/seckill-1/index.html">
+<meta property="og:site_name" content="Adventure's Blog">
+<meta property="og:description" content="本文将从海量服务,卓越性能，高效可用等三方面分享探讨如何设计优化秒杀类系统，以及在实际问题中总结的宝贵经验。">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jd-1.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jd-2.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jd-3.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jd-4.png">
+<meta property="og:image" content="http://adventure0123.github.io/yuanjianwei/img/jd-5.png">
+<meta property="og:updated_time" content="2017-08-05T14:01:45.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="大规模高并发的挑战---揭秘秒杀后台系统">
+<meta name="twitter:description" content="本文将从海量服务,卓越性能，高效可用等三方面分享探讨如何设计优化秒杀类系统，以及在实际问题中总结的宝贵经验。">
+<meta name="twitter:image" content="http://adventure0123.github.io/yuanjianwei/img/jd-1.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 大规模高并发的挑战---揭秘秒杀后台系统 | Adventure's Blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/yuanjianwei/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">Adventure's Blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/yuanjianwei/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/yuanjianwei/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/yuanjianwei/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/yuanjianwei/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                大规模高并发的挑战---揭秘秒杀后台系统
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2017-08-05T21:17:46+08:00" content="2017-08-05">
+              2017-08-05
+            </time>
+          </span>
+
+          
+
+          
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>本文将从海量服务,卓越性能，高效可用等三方面分享探讨如何设计优化秒杀类系统，以及在实际问题中总结的宝贵经验。<a id="more"></a><br>&emsp;&emsp;京东秒杀作为京东核心的促销频道之一，在京东商城中占有重要的地位，其通过超级秒杀日，超级秒杀，新品秒杀等限时促销活动，整合京东的优质资源，以提升用户体验和生活品质为核心，吸引了大量的用户积极参加。</p>
+<center><br><img src="../../../../img/jd-1.png" alt="docker"><br>图1 京东app秒杀前端界面<br></center><br>海量的用户也给秒杀后台系统带来了一些巨大的挑战：<br>&emsp;&emsp;首先，京东秒杀作为整点促销，每天有10个场次，每个场次间隔2-6个小时不等，整点时刻会有成千上万的用户同时涌入秒杀系统进行抢购，尤其是每年的618和双11瞬间的海量流量会对我们的系统和整个链路造成巨大的压力。如何解决切场前后的陡峭波峰流量，进行场次的平滑切换，在技术上难度较大。<br>&emsp;&emsp;其次，秒杀频道作为京东移动app首页和PC版首页的一级入口，又有微信、手机QQ、开普勒项目等导流，每天服务亿万商家和用户，其重要性不言而喻，因此必须保证服务高可用。在实际场景中，各种极端条件下可能出现各种各样预料不到的问题，如何在复杂恶意的极端条件下保证服务的高可用，是一个严峻的挑战。<br>从京东秒杀频道上线至今，京东秒杀稳定可靠高效的形象得到了商家和用户的一致称赞，其背后少不了秒杀后台组开发日复一夜对系统的优化创新以及应急预案的完善梳理。本文将从海量服务,卓越性能，高效可用等三方面分享探讨如何设计优化秒杀类系统，以及在实际问题中总结的宝贵经验<br>### 卓越性能–瞬时流量涌入低延迟<br>&emsp;&emsp;为了应对日常的流量高峰，尤其是618，双11等大促活动的海量流量，后台的架构必须可伸缩—-只需要简单的新加机器就能应对出现的流量高峰。因此必须改变原有的一站式架构，一站式架构的最大问题是不同功能和模块之间的耦合太大，不易于扩展，难以维护。随着网站规模的扩大，对系统的扩容不可避免，而一站式的架构则非常不利于扩容，扩容之后的测试维护成本巨大。为了解决扩容难的问题，必须将不同功能模块和系统进行解耦，采用微服务架构，将整个系统拆分为商品展示，商详，下单，风控，库存，个性化推荐等各个微服务，各服务之间采用消息队列和RPC调用等方式传输数据。<br><center><br><img src="../../../../img/jd-2.png" alt="docker"><br>图2 京东秒杀后台微服务架构<br></center><br>&emsp;&emsp;采用微服务架构，每个服务安排一个团队维护，不同服务之间低耦合，有利于代码的开发和优化，相互之间独立工作，提高了开发效率。并且微服务的架构也更有利于进行水平扩展，按需扩容只对需要的系统进行扩容，一方面有利于快速扩容，另一方面也降低了扩容对整体系统带来的潜在风险。<br>&emsp;&emsp;随着系统的不断扩大、机器的逐渐增多，数据库将会逐渐成为性能的瓶颈。单机mysql的qps极限一般在2W/s,这远远不能满足秒杀的场景需求。常见的做法是采用redis等基于内存的Key-Value数据库作为缓存，减轻对db的压力。在实际使用中，我们会采用机器本地缓存，redis缓存等多级缓存机制，服务实例优先访问本地缓存，当本地缓存失效后访问redis缓存，redis缓存失效再访问db,然后将db的数据缓存到redis和本地。通过多级缓存的方式，减少了对数据库的直接访问，大大降低了对数据库的压力。访问顺序如下图所示：<br><center><br><img src="../../../../img/jd-3.png" alt="docker"><br>图3 数据访问顺序<br></center>
+
+<p>&emsp;&emsp;由于redis缓存是所有实例共享，因此在实际场景中经常会出现热key和某个key体积过大的情况，增加对某一分片的访问压力。为了解决这个问题，一种方式是在业务逻辑中将某一大key拆分为多个小key，另一种方法是对key加随机偏移量，将同一key散列到不同分片上，降低对单一分片的压力。</p>
+<h3 id="卓越性能–瞬时流量涌入低延迟"><a href="#卓越性能–瞬时流量涌入低延迟" class="headerlink" title="卓越性能–瞬时流量涌入低延迟"></a>卓越性能–瞬时流量涌入低延迟</h3><p>&emsp;&emsp;对于秒杀场景最大的挑战是某一时刻流量的突然增大，即所谓的尖峰流量。在秒杀中经常会有当前场次结束之后，切换到下一场次的场景，切场前后往往是流量最大的时刻，解决该问题的一种重要思想是把瞬间的大流量变成一段时间的平缓流量。现有系统秒杀场次的切换基本都依赖于用户主动的刷新，在切场前后用户会频繁的刷新页面，大量用户同时向服务器请求数据，会产生尖峰流量，直接加重了服务器、网络和数据库的压力。在京东秒杀系统中，我们采用切场前预加载的方式来减轻切场前后大流量对系统的压力。</p>
+<p><center><br><img src="../../../../img/jd-4.png" alt="docker"><br>图4 切场预加载流程图<br></center><br>&emsp;&emsp;我们定义t0表示整点切场时间，预加载的时间段为（t1,t2），t1,t2表示距离切场t0的时间，，当预加载的请求时间t落在t1和t2之间则下发下一场次数据，否则不预先下发，即距离切场太近或者太远的请求都不预下发数据，等待到点之后客户端直接请求。每次客户端向服务器发送请求，服务器都会下发一个随机预加载时间t’，t’的范围在t1和t2之间，客户端拿到t’时间之后，判断是否需要在t’时刻预加载数据或者在切场时间t0时刻请求数据。如果客户端预加载成功下一场次的数据，则在场次到点切换之后不再向服务器发送请求，直接使用本地预加载数据。通过这种预加载的方式将整点切场的部分流量分摊到t1和t2时间段，大大削弱了切场整点的尖峰流量。</p>
+<h3 id="高效可用–全年稳定无宕机"><a href="#高效可用–全年稳定无宕机" class="headerlink" title="高效可用–全年稳定无宕机"></a>高效可用–全年稳定无宕机</h3><p>&emsp;&emsp;系统在线上运行时，我们需要实时的监控运行状态，以便能够及时发现问题，并对出现的问题立刻采取措施。在京东秒杀中我们采用ump监控系统和logbooking日志系统对系统的关键指标进行监控，在实际使用中，我们重点关注以下指标：</p>
+<ul>
+<li>接口性能<br>借助ump监控系统，我们重点观察接口的响应时间，接口的可用率和调用次数，一旦某个指标超过设定的阈值，则通过短信和邮件通知系统负责人，及时排查问题。</li>
+<li>线上日志<br>开发人员定期排查线上日志，线上日志作为第一手资料，记录了系统运行的各种重要信息，通过排查线上日志开发人员能够及时发现系统的逻辑错误和潜在的风险。</li>
+<li>基础服务<br>主要包括容器内存，cpu，硬盘容量，redis内存使用量，数据库qps等一系列的指标,一旦发现异常则通过切换流量，重启实例等方法解决问题。</li>
+<li>网络状况<br>重点观察网关和redis缓存的流入流出流量，如果发现某个机房和分片突然出现高流量，可以及时采取扩容限流等措施缓解流量。<br>&emsp;&emsp;虽然我们采取了完善的措施来预防可能发生的异常和事故，但在实际环境中，总会出现各种意料之外的情况，这时就必须依赖于服务降级和兜底。服务降级是指当某些服务和功能超出了额定范围、超负荷工作，为了防止某些功能的超负荷工作拖累整个系统的性能和稳定，必要时需要对次要功能进行降级，保证核心流程的稳定。在实际降级中可以采用自动降级和手动降级相结合的方式，我们的原则是所有非核心流程都必须能被降级。兜底指当服务不可用时，接口返回上次的缓存数据或者预先配置好的静态数据，使用兜底的目的是为了防止服务突然不可用时，接口还能返回数据，不至于出现返回数据为空，导致前端显示为空白的情况。对于降级和兜底开关的配置，我们的做法是将手动降级和兜底开关写入redis缓存，然后通过zookeeper通知实例，实例收到通知后从redis缓存模块读取信息进行降级，通过zk统一通知的方式保证了开关在同一时刻生效。<br><center><br><img src="../../../../img/jd-5.png" alt="docker"><br>图5 降级和兜底开关修改示意图<br></center><br>&emsp;&emsp;归功于秒杀项目所有人员的努力，京东秒杀经受住了历年618、双11的海量流量考验，促销玩法越来越丰富，客户参与人数越来越多，交易额不断创新高。相信随着京东秒杀业务的继续发展，对秒杀后台的挑战和压力也会越来越高，我们秒杀后台组开发将会更加努力，为客户提供更加优质的购物体验。</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/yuanjianwei/tags/seckill/" rel="tag">#seckill</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/yuanjianwei/2017/04/17/seckill/" rel="prev" title="一种秒杀场次自动切换的方法和系统">
+                一种秒杀场次自动切换的方法和系统 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/yuanjianwei/uploads/photo.jpeg"
+               alt="adventure" />
+          <p class="site-author-name" itemprop="name">adventure</p>
+          <p class="site-description motion-element" itemprop="description">looking forword to life's next adventure</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/yuanjianwei/archives">
+              <span class="site-state-item-count">15</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/yuanjianwei/tags">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#卓越性能–瞬时流量涌入低延迟"><span class="nav-number">1.</span> <span class="nav-text">卓越性能–瞬时流量涌入低延迟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#高效可用–全年稳定无宕机"><span class="nav-number">2.</span> <span class="nav-text">高效可用–全年稳定无宕机</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">adventure</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/yuanjianwei/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/yuanjianwei/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/yuanjianwei/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/yuanjianwei/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
